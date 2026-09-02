@@ -1,30 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
-    <radialGradient id="bgGlow" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#2a664e"/>
-      <stop offset="100%" stop-color="#0a1911"/>
+    <radialGradient id="bg-grad" cx="50%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#1b4332"/>
+      <stop offset="60%" stop-color="#0e231a"/>
+      <stop offset="100%" stop-color="#08140f"/>
     </radialGradient>
-    <linearGradient id="stemGrad" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#2d6a4f"/>
-      <stop offset="100%" stop-color="#52b788"/>
+    <radialGradient id="sun-halo" cx="50%" cy="40%" r="50%">
+      <stop offset="0%" stop-color="#fcd34d" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#fcd34d" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="leaf-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#74c69d"/>
+      <stop offset="100%" stop-color="#2d6a4f"/>
     </linearGradient>
-    <linearGradient id="petalGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ffb703"/>
-      <stop offset="100%" stop-color="#fb8500"/>
+    <linearGradient id="pot-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#d97757"/>
+      <stop offset="100%" stop-color="#9c4228"/>
     </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="128" fill="url(#bgGlow)"/>
-  <circle cx="256" cy="256" r="210" fill="none" stroke="#52b788" stroke-width="6" opacity="0.3" stroke-dasharray="16 12"/>
-  <path d="M256,410 Q250,280 256,180" fill="none" stroke="url(#stemGrad)" stroke-width="18" stroke-linecap="round"/>
-  <path d="M256,320 Q190,300 170,250 Q230,240 256,310" fill="#52b788"/>
-  <path d="M256,260 Q320,240 340,190 Q280,180 256,250" fill="#74c69d"/>
-  <g transform="translate(256,160)">
-    <circle cx="0" cy="-35" r="28" fill="url(#petalGrad)"/>
-    <circle cx="33" cy="-12" r="28" fill="url(#petalGrad)"/>
-    <circle cx="21" cy="28" r="28" fill="url(#petalGrad)"/>
-    <circle cx="-21" cy="28" r="28" fill="url(#petalGrad)"/>
-    <circle cx="-33" cy="-12" r="28" fill="url(#petalGrad)"/>
-    <circle cx="0" cy="0" r="24" fill="#ffd166"/>
-    <circle cx="0" cy="0" r="16" fill="#dda15e"/>
-  </g>
+
+  <!-- App Icon Background Circle / Squircle -->
+  <rect width="512" height="512" rx="115" fill="url(#bg-grad)" stroke="rgba(116, 198, 157, 0.3)" stroke-width="6"/>
+
+  <!-- Glowing Sun Ambient Halo -->
+  <circle cx="256" cy="210" r="160" fill="url(#sun-halo)"/>
+
+  <!-- Growing Sprout Leaves -->
+  <!-- Left Arching Leaf -->
+  <path d="M256 260 C 180 240 140 170 180 130 C 230 140 250 200 256 260 Z" fill="url(#leaf-grad)" stroke="#1b4332" stroke-width="4"/>
+  <!-- Right Arching Leaf -->
+  <path d="M256 260 C 332 240 372 170 332 130 C 282 140 262 200 256 260 Z" fill="#52b788" stroke="#1b4332" stroke-width="4"/>
+  <!-- Center Sprout Shoot -->
+  <path d="M256 260 C 248 190 256 120 256 100 C 256 120 264 190 256 260 Z" fill="#95d5b2" stroke="#2d6a4f" stroke-width="3"/>
+  <!-- Center Star Flower -->
+  <circle cx="256" cy="95" r="14" fill="#f472b6"/>
+  <circle cx="256" cy="95" r="7" fill="#fcd34d"/>
+
+  <!-- Glowing Sparkles -->
+  <circle cx="160" cy="110" r="6" fill="#fcd34d" opacity="0.9"/>
+  <circle cx="350" cy="120" r="5" fill="#fcd34d" opacity="0.9"/>
+  <circle cx="256" cy="50" r="4" fill="#fff" opacity="0.9"/>
+
+  <!-- Soil -->
+  <ellipse cx="256" cy="330" rx="120" ry="20" fill="#3e2723" stroke="#5d4037" stroke-width="3"/>
+
+  <!-- Terracotta Clay Pot -->
+  <path d="M166 330 L 186 425 C 188 435 198 442 208 442 L 304 442 C 314 442 324 435 326 425 L 346 330 Z" fill="url(#pot-grad)" stroke="#7c2d12" stroke-width="4"/>
+  <!-- Pot Rim -->
+  <rect x="150" y="318" width="212" height="24" rx="12" fill="#d97757" stroke="#7c2d12" stroke-width="4"/>
+  <!-- Focus Symbol on Pot -->
+  <circle cx="256" cy="385" r="16" fill="rgba(0,0,0,0.2)"/>
+  <polygon points="253,377 263,385 253,393" fill="#fcd34d"/>
 </svg>
