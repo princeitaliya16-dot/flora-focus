@@ -1,0 +1,18 @@
+{
+  "name": "FloraFocus - Botanical Focus Timer & Sanctuary",
+  "short_name": "FloraFocus",
+  "description": "Nurture 25 procedural plant species and harvest honey with Barnabee while staying deeply focused.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0e1c15",
+  "theme_color": "#1b4d3e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
