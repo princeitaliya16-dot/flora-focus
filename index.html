@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>FloraFocus - Botanical Focus Timer & Sanctuary</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1b4d3e">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span>🌿</span> FloraFocus
+    </div>
+    <div class="honey-pill">
+      <span>🍯</span> <span id="honey-balance">50</span>
+    </div>
+  </header>
+
+  <main>
+    <!-- TAB 1: FOCUS TIMER -->
+    <section id="tab-timer" class="tab-content active">
+      <div id="barnabee-avatar" style="position: absolute; right: 24px; top: 75px; z-index: 10;">
+        <div id="bee-container"></div>
+      </div>
+
+      <div class="plant-canvas-container" id="plant-display"></div>
+      <div class="timer-text" id="timer-display">25:00</div>
+
+      <div class="duration-selector">
+        <button class="duration-pill" data-min="15" onclick="timer.setDuration(15)">15m</button>
+        <button class="duration-pill active" data-min="25" onclick="timer.setDuration(25)">25m</button>
+        <button class="duration-pill" data-min="45" onclick="timer.setDuration(45)">45m</button>
+        <button class="duration-pill" data-min="60" onclick="timer.setDuration(60)">60m</button>
+      </div>
+
+      <button class="action-btn" id="timer-toggle-btn" onclick="timer.toggle()">🌱 Start Focus</button>
+      
+      <div class="ambient-toggle" onclick="toggleSoundscape()">
+        <span id="sound-icon">🌧️</span> <span id="sound-label">Forest Rain Soundscape: Off</span>
+      </div>
+    </section>
+
+    <!-- TAB 2: SANCTUARY GARDEN -->
+    <section id="tab-garden" class="tab-content">
+      <h2 style="font-size: 1.3rem; margin-bottom: 6px;">🌸 Sanctuary Garden</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Your thriving collection of blossomed focus sessions.</p>
+      <div class="garden-grid" id="garden-grid"></div>
+    </section>
+
+    <!-- TAB 3: APOTHECARY & SEEDS -->
+    <section id="tab-shop" class="tab-content">
+      <h2 style="font-size: 1.3rem; margin-bottom: 6px;">🏺 Seed Apothecary</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Exchange harvested honey to unlock legendary botanical species.</p>
+      <div class="shop-grid" id="shop-grid"></div>
+    </section>
+
+    <!-- TAB 4: STATS & INSIGHTS -->
+    <section id="tab-stats" class="tab-content">
+      <h2 style="font-size: 1.3rem; margin-bottom: 12px;">📊 Focus Insights</h2>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div style="background: var(--bg-surface); padding: 16px; border-radius: 14px; text-align: center;">
+          <div style="font-size: 2rem; font-weight: bold; color: var(--accent-gold);" id="stat-streak">0</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Day Streak 🔥</div>
+        </div>
+        <div style="background: var(--bg-surface); padding: 16px; border-radius: 14px; text-align: center;">
+          <div style="font-size: 2rem; font-weight: bold; color: var(--accent-mint);" id="stat-focus-min">0</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Total Min Focused ⏱️</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav>
+    <div class="nav-item active" onclick="switchTab('tab-timer', this)">
+      <div class="nav-icon">⏱️</div>
+      <span>Timer</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-garden', this)">
+      <div class="nav-icon">🌿</div>
+      <span>Garden</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-shop', this)">
+      <div class="nav-icon">🏺</div>
+      <span>Shop</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('tab-stats', this)">
+      <div class="nav-icon">📊</div>
+      <span>Stats</span>
+    </div>
+  </nav>
+
+  <script src="plants.js"></script>
+  <script src="audio.js"></script>
+  <script src="bees.js"></script>
+  <script src="economy.js"></script>
+  <script src="garden.js"></script>
+  <script src="stats.js"></script>
+  <script src="timer.js"></script>
+  <script>
+    function switchTab(tabId, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      el.classList.add('active');
+      if (tabId === 'tab-garden') garden.render();
+      if (tabId === 'tab-shop') renderApothecary();
+      if (tabId === 'tab-stats') stats.render();
+    }
+
+    function toggleSoundscape() {
+      const playing = sounds.toggleAmbient('rain');
+      document.getElementById('sound-label').innerText = `Forest Rain Soundscape: ${playing ? 'Active 🎧' : 'Off'}`;
+    }
+
+    function renderApothecary() {
+      const grid = document.getElementById('shop-grid');
+      if (!grid) return;
+      grid.innerHTML = PLANT_SPECIES.map(p => {
+        const isUnlocked = economy.unlockedSpecies.includes(p.id);
+        const isSelected = economy.selectedSpecies === p.id;
+        return `
+          <div class="shop-card">
+            <div class="garden-svg">${renderPlantSVG(p.id, 0.8)}</div>
+            <div class="garden-name">${p.name}</div>
+            <div class="garden-tag">${p.rarity} • +${p.nectar}🍯</div>
+            <div style="margin-top: 8px; width: 100%;">
+              ${isUnlocked ? `
+                <button class="duration-pill ${isSelected ? 'active' : ''}" style="width: 100%; font-size: 0.8rem;" onclick="economy.selectPlant('${p.id}')">
+                  ${isSelected ? 'Selected' : 'Select'}
+                </button>
+              ` : `
+                <button class="duration-pill" style="width: 100%; font-size: 0.8rem; background: var(--accent-gold); color: #1b120c; font-weight: bold;" onclick="economy.unlockPlant('${p.id}')">
+                  Unlock ${p.unlockCost}🍯
+                </button>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Initialize App
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('bee-container').innerHTML = barnabee.renderBeeSVG();
+      document.getElementById('plant-display').innerHTML = renderPlantSVG(economy.selectedSpecies, 0.1);
+      economy.updateUI();
+      stats.render();
+    });
+  </script>
+</body>
+</html>
