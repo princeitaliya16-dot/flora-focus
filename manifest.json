@@ -1,12 +1,13 @@
 {
-  "name": "FloraFocus - Botanical Focus Timer & Sanctuary",
+  "name": "FloraFocus — Plant Focus Timer",
   "short_name": "FloraFocus",
-  "description": "Nurture 25 procedural plant species and harvest honey with Barnabee while staying deeply focused.",
+  "description": "Gamified botanical focus timer that grows flowers and majestic trees as you focus.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#0e1c15",
-  "theme_color": "#1b4d3e",
   "orientation": "portrait-primary",
+  "background_color": "#0e1c15",
+  "theme_color": "#14281f",
   "icons": [
     {
       "src": "icon.svg",
@@ -14,5 +15,6 @@
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "categories": ["productivity", "health", "lifestyle"]
 }
