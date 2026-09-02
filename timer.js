@@ -1,92 +1,154 @@
-// FloraFocus Focus Timer & Growth Controller
+/* ==========================================================================
+   FLORAFOCUS — Focus Timer Engine
+   Accurate delta-time tracking and stage progression calculation
+   ========================================================================== */
+
 class FocusTimer {
-  constructor() {
-    this.duration = 25 * 60; // default 25 min
-    this.remaining = 25 * 60;
-    this.isRunning = false;
-    this.interval = null;
-    this.streak = parseInt(localStorage.getItem('florafocus_streak') || '0', 10);
-    this.totalFocusMin = parseInt(localStorage.getItem('florafocus_total_min') || '0', 10);
+  constructor(options = {}) {
+    this.selectedMinutes = 15;
+    this.speciesId = 'succulent';
+    this.currentTag = 'Deep Work';
+    
+    this.totalSeconds = 15 * 60;
+    this.remainingSeconds = this.totalSeconds;
+    this.elapsedSeconds = 0;
+    
+    this.state = 'idle'; // 'idle', 'running', 'paused', 'completed', 'withered'
+    this.currentStageIndex = 0;
+    
+    this.startTime = null;
+    this.lastTickTime = null;
+    this.timerInterval = null;
+
+    // Callbacks
+    this.onTick = options.onTick || (() => {});
+    this.onStageChange = options.onStageChange || (() => {});
+    this.onComplete = options.onComplete || (() => {});
+    this.onWither = options.onWither || (() => {});
+    this.onStateChange = options.onStateChange || (() => {});
   }
 
-  setDuration(minutes) {
-    if (this.isRunning) return;
-    this.duration = minutes * 60;
-    this.remaining = this.duration;
-    this.updateDisplay();
-    document.querySelectorAll('.duration-pill').forEach(btn => {
-      btn.classList.toggle('active', parseInt(btn.dataset.min) === minutes);
-    });
+  setDuration(minutes, speciesId) {
+    if (this.state === 'running' || this.state === 'paused') return;
+    this.selectedMinutes = minutes;
+    this.speciesId = speciesId;
+    this.totalSeconds = minutes * 60;
+    this.remainingSeconds = this.totalSeconds;
+    this.elapsedSeconds = 0;
+    this.currentStageIndex = 0;
+    this.onTick(this.getSnapshot());
   }
 
-  toggle() {
-    if (this.isRunning) {
-      this.pause();
-    } else {
-      this.start();
-    }
+  setTag(tag) {
+    this.currentTag = tag;
   }
 
   start() {
-    sounds.init();
-    sounds.playChime('start');
-    this.isRunning = true;
-    document.getElementById('timer-toggle-btn').innerHTML = '⏸️ Pause';
-    document.getElementById('timer-toggle-btn').classList.add('running');
+    if (this.state === 'running') return;
+
+    this.state = 'running';
+    this.lastTickTime = Date.now();
     
-    this.interval = setInterval(() => {
-      this.remaining--;
-      this.updateDisplay();
-      
-      const progress = 1 - (this.remaining / this.duration);
-      document.getElementById('plant-display').innerHTML = renderPlantSVG(economy.selectedSpecies, progress);
-      
-      if (this.remaining <= 0) {
-        this.complete();
-      }
-    }, 1000);
+    if (!this.startTime) {
+      this.startTime = Date.now();
+    }
+
+    this.onStateChange(this.state);
+    
+    clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => this.tick(), 100);
   }
 
   pause() {
-    this.isRunning = false;
-    clearInterval(this.interval);
-    document.getElementById('timer-toggle-btn').innerHTML = '▶️ Resume';
-    document.getElementById('timer-toggle-btn').classList.remove('running');
+    if (this.state !== 'running') return;
+    this.state = 'paused';
+    clearInterval(this.timerInterval);
+    this.onStateChange(this.state);
+  }
+
+  resume() {
+    if (this.state !== 'paused') return;
+    this.start();
+  }
+
+  giveUp() {
+    if (this.state !== 'running' && this.state !== 'paused') return;
+    this.state = 'withered';
+    clearInterval(this.timerInterval);
+    this.onStateChange(this.state);
+    this.onWither(this.getSnapshot());
   }
 
   reset() {
-    this.pause();
-    this.remaining = this.duration;
-    document.getElementById('timer-toggle-btn').innerHTML = '🌱 Start Focus';
-    this.updateDisplay();
-    document.getElementById('plant-display').innerHTML = renderPlantSVG(economy.selectedSpecies, 0.1);
+    clearInterval(this.timerInterval);
+    this.state = 'idle';
+    this.startTime = null;
+    this.lastTickTime = null;
+    this.totalSeconds = this.selectedMinutes * 60;
+    this.remainingSeconds = this.totalSeconds;
+    this.elapsedSeconds = 0;
+    this.currentStageIndex = 0;
+    this.onStateChange(this.state);
+    this.onTick(this.getSnapshot());
+  }
+
+  tick() {
+    if (this.state !== 'running') return;
+
+    const now = Date.now();
+    const deltaMs = now - this.lastTickTime;
+    this.lastTickTime = now;
+
+    // Normal authentic 1x real-time progression
+    const deltaSeconds = deltaMs / 1000;
+    this.elapsedSeconds += deltaSeconds;
+    this.remainingSeconds = Math.max(0, this.totalSeconds - this.elapsedSeconds);
+
+    const progress = Math.min(100, (this.elapsedSeconds / this.totalSeconds) * 100);
+    const newStageIndex = getStageIndex(progress);
+
+    if (newStageIndex !== this.currentStageIndex) {
+      this.currentStageIndex = newStageIndex;
+      this.onStageChange(newStageIndex, this.getSnapshot());
+    }
+
+    this.onTick(this.getSnapshot());
+
+    if (this.remainingSeconds <= 0) {
+      this.complete();
+    }
   }
 
   complete() {
-    this.pause();
-    sounds.playChime('complete');
-    const plant = PLANT_SPECIES.find(p => p.id === economy.selectedSpecies);
-    const nectarEarned = plant ? plant.nectar : 20;
-    economy.addHoney(nectarEarned);
-    
-    this.streak++;
-    this.totalFocusMin += Math.round(this.duration / 60);
-    localStorage.setItem('florafocus_streak', this.streak.toString());
-    localStorage.setItem('florafocus_total_min', this.totalFocusMin.toString());
-
-    garden.addPlantToSanctuary(economy.selectedSpecies);
-    stats.recordSession(Math.round(this.duration / 60), nectarEarned);
-    
-    alert(`🎉 Bloom Complete! You earned +${nectarEarned} 🍯 Honey Nectar!`);
-    this.reset();
+    clearInterval(this.timerInterval);
+    this.state = 'completed';
+    this.remainingSeconds = 0;
+    this.elapsedSeconds = this.totalSeconds;
+    this.currentStageIndex = 4;
+    this.onStateChange(this.state);
+    this.onTick(this.getSnapshot());
+    this.onComplete(this.getSnapshot());
   }
 
-  updateDisplay() {
-    const mins = Math.floor(this.remaining / 60);
-    const secs = this.remaining % 60;
-    const str = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-    const el = document.getElementById('timer-display');
-    if (el) el.innerText = str;
+  getSnapshot() {
+    const progress = Math.min(100, (this.elapsedSeconds / this.totalSeconds) * 100);
+    return {
+      minutes: this.selectedMinutes,
+      speciesId: this.speciesId,
+      tag: this.currentTag,
+      totalSeconds: this.totalSeconds,
+      remainingSeconds: Math.ceil(this.remainingSeconds),
+      elapsedSeconds: Math.floor(this.elapsedSeconds),
+      progress: progress,
+      stageIndex: this.currentStageIndex,
+      state: this.state,
+      formattedTime: this.formatTime(Math.ceil(this.remainingSeconds))
+    };
+  }
+
+  formatTime(seconds) {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
   }
 }
-const timer = new FocusTimer();
