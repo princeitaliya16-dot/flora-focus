@@ -1,153 +1,585 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>FloraFocus - Botanical Focus Timer & Sanctuary</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1b4d3e">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#14281f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="application-name" content="FloraFocus" />
+  <title>FloraFocus — Grow Your Focus Garden & Bee Farm</title>
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <header>
-    <div class="brand">
-      <span>🌿</span> FloraFocus
-    </div>
-    <div class="honey-pill">
-      <span>🍯</span> <span id="honey-balance">50</span>
-    </div>
-  </header>
+<body class="theme-forest">
+  <!-- Ambient Particle Canvas for Pollen, Petals, Sunbeams -->
+  <canvas id="ambient-canvas" class="ambient-canvas"></canvas>
 
-  <main>
-    <!-- TAB 1: FOCUS TIMER -->
-    <section id="tab-timer" class="tab-content active">
-      <div id="barnabee-avatar" style="position: absolute; right: 24px; top: 75px; z-index: 10;">
-        <div id="bee-container"></div>
+  <!-- Main App Container -->
+  <div class="app-wrapper">
+    <!-- Top Navigation Bar -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-icon">🌱</div>
+        <div class="brand-text">
+          <h1>FloraFocus</h1>
+          <span class="tagline">Plant focus, harvest honey</span>
+        </div>
       </div>
 
-      <div class="plant-canvas-container" id="plant-display"></div>
-      <div class="timer-text" id="timer-display">25:00</div>
+      <nav class="nav-tabs" role="tablist">
+        <button class="nav-btn active" data-tab="timer" title="Focus Timer">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span>Focus</span>
+        </button>
+        <button class="nav-btn" data-tab="garden" title="Garden Sanctuary">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a9 9 0 0 0-9 9c0 4.97 4.03 9 9 9s9-4.03 9-9a9 9 0 0 0-9-9z"/><path d="M12 12v9"/><path d="M12 12c-2-2-4-2-6 0"/><path d="M12 15c2-2 4-2 6 0"/></svg>
+          <span>Sanctuary</span>
+          <span class="badge" id="garden-count-badge">0</span>
+        </button>
+        <button class="nav-btn" data-tab="apiary" title="Bee Farm & Hive">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v12l-7 4-7-4V6z"/><path d="M12 6l4 2.5v5L12 16l-4-2.5v-5z"/></svg>
+          <span>Apiary</span>
+        </button>
+        <button class="nav-btn" data-tab="shop" title="Greenhouse & Honey Market">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span>Market</span>
+        </button>
+        <button class="nav-btn" data-tab="apothecary" title="Tea Apothecary">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+          <span>Apothecary</span>
+        </button>
+        <button class="nav-btn" data-tab="stats" title="Insights & Streaks">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+          <span>Insights</span>
+        </button>
+        <button class="nav-btn" data-tab="collection" title="Plant Codex">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+          <span>Codex</span>
+        </button>
+      </nav>
 
-      <div class="duration-selector">
-        <button class="duration-pill" data-min="15" onclick="timer.setDuration(15)">15m</button>
-        <button class="duration-pill active" data-min="25" onclick="timer.setDuration(25)">25m</button>
-        <button class="duration-pill" data-min="45" onclick="timer.setDuration(45)">45m</button>
-        <button class="duration-pill" data-min="60" onclick="timer.setDuration(60)">60m</button>
+      <div class="header-actions">
+        <!-- Sunstones Treasury -->
+        <div class="sunstones-pill" title="Sunstones Treasury">
+          <span class="coin-icon">☀️</span>
+          <span class="sunstones-count">60</span>
+        </div>
+
+        <!-- Honey Jars Inventory -->
+        <div class="honey-pill" title="Bottled Honey Jars">
+          <span>🍯</span>
+          <span class="honey-jar-count">2</span>
+        </div>
+
+        <!-- Ambient Sound Toggle -->
+        <button id="sound-drawer-btn" class="icon-btn" title="Ambient Soundscapes">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.08"/></svg>
+          <span class="sound-indicator" id="sound-indicator"></span>
+        </button>
+
+        <!-- Zen Fullscreen -->
+        <button id="zen-mode-btn" class="icon-btn" title="Toggle Zen Fullscreen">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        </button>
       </div>
+    </header>
 
-      <button class="action-btn" id="timer-toggle-btn" onclick="timer.toggle()">🌱 Start Focus</button>
+    <!-- Main Content Tabs -->
+    <main class="app-main">
       
-      <div class="ambient-toggle" onclick="toggleSoundscape()">
-        <span id="sound-icon">🌧️</span> <span id="sound-label">Forest Rain Soundscape: Off</span>
-      </div>
-    </section>
+      <!-- ==================== TAB 1: FOCUS TIMER ==================== -->
+      <section id="tab-timer" class="tab-pane active">
+        <div class="timer-layout">
+          
+          <!-- Left: Plant Growing Stage & Bee Companion Display -->
+          <div class="plant-stage-card">
+            <div class="plant-info-header">
+              <span class="tier-pill" id="plant-tier-badge">Tier 1 • 15m</span>
+              <h2 class="plant-title" id="plant-species-name">Little Jade Succulent</h2>
+              <p class="plant-lore" id="plant-lore-text">A resilient little sprout, ideal for quick sprints and crisp focus.</p>
+            </div>
 
-    <!-- TAB 2: SANCTUARY GARDEN -->
-    <section id="tab-garden" class="tab-content">
-      <h2 style="font-size: 1.3rem; margin-bottom: 6px;">🌸 Sanctuary Garden</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Your thriving collection of blossomed focus sessions.</p>
-      <div class="garden-grid" id="garden-grid"></div>
-    </section>
+            <!-- Plant & Bee Companion Viewport -->
+            <div class="plant-viewport" id="plant-viewport">
+              <!-- Barnaby Floating Bee Companion Injected Here -->
+              <div id="bee-companion-slot"></div>
 
-    <!-- TAB 3: APOTHECARY & SEEDS -->
-    <section id="tab-shop" class="tab-content">
-      <h2 style="font-size: 1.3rem; margin-bottom: 6px;">🏺 Seed Apothecary</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Exchange harvested honey to unlock legendary botanical species.</p>
-      <div class="shop-grid" id="shop-grid"></div>
-    </section>
+              <div class="stage-sun-halo"></div>
+              <div id="plant-svg-container" class="plant-svg-container">
+                <!-- SVG dynamically injected -->
+              </div>
+              <div class="pot-and-soil">
+                <div class="soil-surface"></div>
+                <div class="ceramic-pot pot-terracotta">
+                  <div class="pot-rim"></div>
+                  <div class="pot-body">
+                    <span class="pot-engraving" id="pot-tag-label">✨ Focus</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-    <!-- TAB 4: STATS & INSIGHTS -->
-    <section id="tab-stats" class="tab-content">
-      <h2 style="font-size: 1.3rem; margin-bottom: 12px;">📊 Focus Insights</h2>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div style="background: var(--bg-surface); padding: 16px; border-radius: 14px; text-align: center;">
-          <div style="font-size: 2rem; font-weight: bold; color: var(--accent-gold);" id="stat-streak">0</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Day Streak 🔥</div>
-        </div>
-        <div style="background: var(--bg-surface); padding: 16px; border-radius: 14px; text-align: center;">
-          <div style="font-size: 2rem; font-weight: bold; color: var(--accent-mint);" id="stat-focus-min">0</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Total Min Focused ⏱️</div>
-        </div>
-      </div>
-    </section>
-  </main>
+            <!-- Dual Progress: Plant Evolution & Honeycomb Apiary Fill -->
+            <div class="growth-progress-wrapper">
+              <!-- Plant Growth Progress -->
+              <div class="progress-section-item">
+                <div class="growth-labels">
+                  <span class="growth-stage-name" id="stage-text">Stage 1: Planted Seed (0%)</span>
+                  <span class="growth-pct" id="growth-percentage">0%</span>
+                </div>
+                <div class="progress-track">
+                  <div class="progress-fill" id="growth-progress-fill" style="width: 0%"></div>
+                  <div class="stage-milestone" style="left: 0%" title="Seed"></div>
+                  <div class="stage-milestone" style="left: 25%" title="Sprout"></div>
+                  <div class="stage-milestone" style="left: 50%" title="Sapling"></div>
+                  <div class="stage-milestone" style="left: 75%" title="Budding"></div>
+                  <div class="stage-milestone" style="left: 100%" title="Full Bloom"></div>
+                </div>
+              </div>
 
-  <nav>
-    <div class="nav-item active" onclick="switchTab('tab-timer', this)">
-      <div class="nav-icon">⏱️</div>
-      <span>Timer</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('tab-garden', this)">
-      <div class="nav-icon">🌿</div>
-      <span>Garden</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('tab-shop', this)">
-      <div class="nav-icon">🏺</div>
-      <span>Shop</span>
-    </div>
-    <div class="nav-item" onclick="switchTab('tab-stats', this)">
-      <div class="nav-icon">📊</div>
-      <span>Stats</span>
-    </div>
-  </nav>
-
-  <script src="plants.js"></script>
-  <script src="audio.js"></script>
-  <script src="bees.js"></script>
-  <script src="economy.js"></script>
-  <script src="garden.js"></script>
-  <script src="stats.js"></script>
-  <script src="timer.js"></script>
-  <script>
-    function switchTab(tabId, el) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById(tabId).classList.add('active');
-      el.classList.add('active');
-      if (tabId === 'tab-garden') garden.render();
-      if (tabId === 'tab-shop') renderApothecary();
-      if (tabId === 'tab-stats') stats.render();
-    }
-
-    function toggleSoundscape() {
-      const playing = sounds.toggleAmbient('rain');
-      document.getElementById('sound-label').innerText = `Forest Rain Soundscape: ${playing ? 'Active 🎧' : 'Off'}`;
-    }
-
-    function renderApothecary() {
-      const grid = document.getElementById('shop-grid');
-      if (!grid) return;
-      grid.innerHTML = PLANT_SPECIES.map(p => {
-        const isUnlocked = economy.unlockedSpecies.includes(p.id);
-        const isSelected = economy.selectedSpecies === p.id;
-        return `
-          <div class="shop-card">
-            <div class="garden-svg">${renderPlantSVG(p.id, 0.8)}</div>
-            <div class="garden-name">${p.name}</div>
-            <div class="garden-tag">${p.rarity} • +${p.nectar}🍯</div>
-            <div style="margin-top: 8px; width: 100%;">
-              ${isUnlocked ? `
-                <button class="duration-pill ${isSelected ? 'active' : ''}" style="width: 100%; font-size: 0.8rem;" onclick="economy.selectPlant('${p.id}')">
-                  ${isSelected ? 'Selected' : 'Select'}
-                </button>
-              ` : `
-                <button class="duration-pill" style="width: 100%; font-size: 0.8rem; background: var(--accent-gold); color: #1b120c; font-weight: bold;" onclick="economy.unlockPlant('${p.id}')">
-                  Unlock ${p.unlockCost}🍯
-                </button>
-              `}
+              <!-- Honeycomb Nectar Progress -->
+              <div class="honeycomb-progress-section">
+                <div class="honeycomb-labels">
+                  <span class="honeycomb-title">🍯 Apiary Honeycomb Fill</span>
+                  <span class="honeycomb-pct" id="honeycomb-percentage">0% Nectar</span>
+                </div>
+                <div class="honeycomb-track">
+                  <div class="honeycomb-fill" id="honeycomb-progress-fill" style="width: 0%"></div>
+                </div>
+              </div>
             </div>
           </div>
-        `;
-      }).join('');
-    }
 
-    // Initialize App
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('bee-container').innerHTML = barnabee.renderBeeSVG();
-      document.getElementById('plant-display').innerHTML = renderPlantSVG(economy.selectedSpecies, 0.1);
-      economy.updateUI();
-      stats.render();
-    });
+          <!-- Right: Timer Controls & Slot Selection -->
+          <div class="timer-controls-card">
+            
+            <!-- Focus Slots Selector -->
+            <div class="slot-selection-panel" id="slot-selection-panel">
+              <label class="section-label">Select Focus Duration & Plant Species</label>
+              <div class="slot-grid" id="focus-slot-grid"></div>
+            </div>
+
+            <!-- Focus Tag Selector -->
+            <div class="focus-meta-panel" id="focus-meta-panel">
+              <label class="section-label">Session Focus Tag</label>
+              <div class="tag-chips" id="tag-chips">
+                <button class="tag-chip active" data-tag="Deep Work">💻 Deep Work</button>
+                <button class="tag-chip" data-tag="Study">📚 Study</button>
+                <button class="tag-chip" data-tag="Reading">📖 Reading</button>
+                <button class="tag-chip" data-tag="Writing">✍️ Writing</button>
+                <button class="tag-chip" data-tag="Creative">🎨 Creative</button>
+                <button class="tag-chip" data-tag="Meditation">🧘 Meditation</button>
+              </div>
+            </div>
+
+            <!-- Big Countdown Display -->
+            <div class="countdown-display">
+              <div class="time-readout" id="timer-display">15:00</div>
+              <div class="time-subtext" id="timer-subtext">Ready to plant your seed</div>
+            </div>
+
+            <!-- Timer Action Buttons -->
+            <div class="timer-actions">
+              <button id="timer-start-btn" class="btn btn-primary btn-large">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <span id="timer-start-text">Plant Seed & Start</span>
+              </button>
+
+              <button id="timer-pause-btn" class="btn btn-secondary btn-large hidden">
+                <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                <span>Pause</span>
+              </button>
+
+              <button id="timer-giveup-btn" class="btn btn-danger hidden" title="Abandoning will cause the plant to wither">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                <span>Give Up</span>
+              </button>
+            </div>
+
+            <!-- Motivational Quote Banner -->
+            <div class="quote-card">
+              <p class="quote-text" id="quote-text">"The creation of a thousand forests is in one acorn."</p>
+              <span class="quote-author" id="quote-author">— Ralph Waldo Emerson</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 2: GARDEN SANCTUARY ==================== -->
+      <section id="tab-garden" class="tab-pane">
+        <div class="garden-container">
+          <div class="garden-header">
+            <div>
+              <h2 class="section-heading">My Garden Sanctuary</h2>
+              <p class="section-subheading">A living tapestry of all your focused hours and harvested botanical flora.</p>
+            </div>
+            
+            <div class="garden-filters">
+              <select id="garden-filter-tag" class="select-input">
+                <option value="all">All Tags</option>
+                <option value="Deep Work">Deep Work</option>
+                <option value="Study">Study</option>
+                <option value="Reading">Reading</option>
+                <option value="Writing">Writing</option>
+                <option value="Creative">Creative</option>
+                <option value="Meditation">Meditation</option>
+              </select>
+
+              <select id="garden-filter-status" class="select-input">
+                <option value="all">All Plants</option>
+                <option value="healthy">Bloomed Only</option>
+                <option value="withered">Withered Only</option>
+              </select>
+
+              <button id="garden-clear-btn" class="pill-btn danger-text" title="Clear garden history">
+                <span>Reset Garden</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="garden-summary-bar">
+            <div class="stat-pill">
+              <span class="stat-num" id="garden-total-plants">0</span>
+              <span class="stat-desc">Trees Planted</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" id="garden-total-minutes">0h 0m</span>
+              <span class="stat-desc">Total Focus</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" id="garden-success-rate">100%</span>
+              <span class="stat-desc">Bloom Rate</span>
+            </div>
+            <div class="stat-pill">
+              <span class="stat-num" id="garden-active-streak">0 🔥</span>
+              <span class="stat-desc">Day Streak</span>
+            </div>
+          </div>
+
+          <div class="garden-grid-wrapper">
+            <div class="garden-grid" id="garden-grid"></div>
+            <div id="garden-empty-state" class="empty-state">
+              <div class="empty-icon">🌱</div>
+              <h3>Your sanctuary is waiting for its first seed</h3>
+              <p>Start a focus session to grow your first plant or visit the Market to collect exotic seeds!</p>
+              <button class="btn btn-primary go-focus-btn" onclick="document.querySelector('[data-tab=timer]').click()">
+                Plant Your First Tree
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 3: BEE FARM & APIARY ==================== -->
+      <section id="tab-apiary" class="tab-pane">
+        <div class="apiary-container" id="apiary-view-container">
+          <!-- Rendered dynamically by bees.js -->
+        </div>
+      </section>
+
+      <!-- ==================== TAB 4: GREENHOUSE & HONEY MARKET ==================== -->
+      <section id="tab-shop" class="tab-pane">
+        <div class="shop-container">
+          
+          <!-- Honey Trading Post -->
+          <div class="honey-trading-card">
+            <div class="honey-trade-flex">
+              <div class="honey-trade-icon">🍯</div>
+              <div class="honey-trade-details">
+                <h3>Bumblewing Honey Trading Post</h3>
+                <p>Sell your freshly harvested Wildflower Honey Jars directly to travelers for <strong>35 ☀️ Sunstones each</strong>!</p>
+                <div class="honey-inventory-row">
+                  <span>Available Honey: <strong class="honey-jar-count">2</strong> Jars</span>
+                </div>
+              </div>
+              <div class="honey-trade-actions">
+                <button id="sell-one-honey-btn" class="btn btn-secondary btn-small">Sell 1 Jar (+35 ☀️)</button>
+                <button id="sell-all-honey-btn" class="btn btn-primary btn-small">Sell All Honey 🍯</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Daily Bloom Quests Section -->
+          <div class="daily-quests-section">
+            <div class="card-header-flex">
+              <div>
+                <h3 class="section-heading">📜 Daily Bloom Bounties</h3>
+                <p class="section-subheading">Complete daily challenges to earn bonus Sunstones.</p>
+              </div>
+              <span class="tag-pill">Refreshes Daily</span>
+            </div>
+            <div class="daily-quests-list" id="daily-quests-container"></div>
+          </div>
+
+          <!-- Greenhouse Shop Section -->
+          <div class="shop-main-section">
+            <div class="card-header-flex">
+              <div>
+                <h2 class="section-heading">🏡 The Greenhouse Market</h2>
+                <p class="section-subheading">Spend Sunstones to equip artisan pots, customize sanctuary biomes, and unlock mythic seeds.</p>
+              </div>
+              <div class="sunstones-pill large">
+                <span class="coin-icon">☀️</span>
+                <span class="sunstones-count">60</span>
+                <span>Sunstones</span>
+              </div>
+            </div>
+
+            <div id="shop-catalog-container"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 5: TEA APOTHECARY ==================== -->
+      <section id="tab-apothecary" class="tab-pane">
+        <div class="apothecary-container" id="apothecary-view-container"></div>
+      </section>
+
+      <!-- ==================== TAB 6: INSIGHTS & STATS ==================== -->
+      <section id="tab-stats" class="tab-pane">
+        <div class="stats-container">
+          <div class="stats-header">
+            <h2 class="section-heading">Focus Analytics & Habits</h2>
+            <p class="section-subheading">Track your consistency, species harvested, and daily flow state.</p>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon bg-emerald">⏱️</div>
+              <div class="metric-body">
+                <span class="metric-title">Total Focus Time</span>
+                <span class="metric-val" id="stat-total-time">0h 0m</span>
+                <span class="metric-sub" id="stat-sessions-count">0 sessions completed</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon bg-amber">🔥</div>
+              <div class="metric-body">
+                <span class="metric-title">Current Streak</span>
+                <span class="metric-val" id="stat-current-streak">0 Days</span>
+                <span class="metric-sub" id="stat-best-streak">Best streak: 0 days</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon bg-purple">🌿</div>
+              <div class="metric-body">
+                <span class="metric-title">Species Unlocked</span>
+                <span class="metric-val" id="stat-species-count">0 / 8</span>
+                <span class="metric-sub">Including Market Exotic Seeds</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon bg-blue">⭐</div>
+              <div class="metric-body">
+                <span class="metric-title">Focus Quality</span>
+                <span class="metric-val" id="stat-focus-score">100%</span>
+                <span class="metric-sub" id="stat-withered-count">0 withered plants</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="card-header-flex">
+              <h3 class="card-title">Weekly Focus Hours</h3>
+              <span class="tag-pill" id="stat-week-total">0 min this week</span>
+            </div>
+            <div class="weekly-bar-chart" id="weekly-bar-chart"></div>
+          </div>
+
+          <div class="two-col-grid">
+            <div class="chart-card">
+              <h3 class="card-title">Focus Time by Tag</h3>
+              <div class="tag-distribution-list" id="tag-distribution-list"></div>
+            </div>
+
+            <div class="chart-card">
+              <h3 class="card-title">Species Cultivated</h3>
+              <div class="species-stat-list" id="species-stat-list"></div>
+            </div>
+          </div>
+
+          <div class="data-manage-card">
+            <div class="data-manage-info">
+              <h4>Backup & Sync Data</h4>
+              <p>Your garden, apiary & economy are stored securely in your local browser.</p>
+            </div>
+            <div class="data-manage-actions">
+              <button id="export-data-btn" class="btn btn-secondary">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Export JSON</span>
+              </button>
+              <label class="btn btn-secondary file-upload-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <span>Import JSON</span>
+                <input type="file" id="import-data-file" accept=".json" style="display:none" />
+              </label>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== TAB 7: PLANT CODEX ==================== -->
+      <section id="tab-collection" class="tab-pane">
+        <div class="codex-container">
+          <div class="codex-header">
+            <h2 class="section-heading">Plant Codex & Growth Stages</h2>
+            <p class="section-subheading">Discover all standard and mythic botanical species and their evolutionary stages.</p>
+          </div>
+          <div class="codex-grid" id="codex-grid"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ==================== AMBIENT AUDIO DRAWER MODAL ==================== -->
+    <div id="sound-drawer" class="sound-drawer">
+      <div class="drawer-header">
+        <div class="drawer-title">
+          <span>🎧</span>
+          <h3>Ambient Soundscapes</h3>
+        </div>
+        <button id="sound-drawer-close" class="close-btn">&times;</button>
+      </div>
+      <p class="drawer-subtitle">Synthesized organic white noise and relaxing nature environments.</p>
+
+      <div class="sound-presets-list">
+        <div class="sound-track" data-track="rain">
+          <div class="track-header">
+            <div class="track-name"><span class="track-emoji">🌧️</span> Gentle Rain on Leaves</div>
+            <button class="track-play-toggle">Play</button>
+          </div>
+          <input type="range" class="track-volume" min="0" max="100" value="60" />
+        </div>
+        <div class="sound-track" data-track="forest">
+          <div class="track-header">
+            <div class="track-name"><span class="track-emoji">🌲</span> Forest Birds & Wind</div>
+            <button class="track-play-toggle">Play</button>
+          </div>
+          <input type="range" class="track-volume" min="0" max="100" value="50" />
+        </div>
+        <div class="sound-track" data-track="fire">
+          <div class="track-header">
+            <div class="track-name"><span class="track-emoji">🪵</span> Cozy Hearth Fire</div>
+            <button class="track-play-toggle">Play</button>
+          </div>
+          <input type="range" class="track-volume" min="0" max="100" value="40" />
+        </div>
+        <div class="sound-track" data-track="stream">
+          <div class="track-header">
+            <div class="track-name"><span class="track-emoji">💧</span> Mountain Brook</div>
+            <button class="track-play-toggle">Play</button>
+          </div>
+          <input type="range" class="track-volume" min="0" max="100" value="50" />
+        </div>
+        <div class="sound-track" data-track="wind">
+          <div class="track-header">
+            <div class="track-name"><span class="track-emoji">🍃</span> Soft Breeze & Chimes</div>
+            <button class="track-play-toggle">Play</button>
+          </div>
+          <input type="range" class="track-volume" min="0" max="100" value="45" />
+        </div>
+      </div>
+
+      <div class="drawer-footer">
+        <button id="mute-all-sounds" class="btn btn-secondary btn-full">Mute All Sounds</button>
+      </div>
+    </div>
+
+    <!-- ==================== PLANT DETAIL INSPECTOR MODAL ==================== -->
+    <div id="plant-modal" class="modal-backdrop">
+      <div class="modal-card">
+        <button id="modal-close-btn" class="modal-close">&times;</button>
+        <div class="modal-plant-preview" id="modal-plant-art"></div>
+        <div class="modal-plant-body">
+          <span class="tier-pill" id="modal-tier-pill">Tier 2</span>
+          <h3 id="modal-plant-name">Radiant Sunflower</h3>
+          <p class="modal-lore" id="modal-plant-lore"></p>
+          
+          <div class="modal-meta-grid">
+            <div class="meta-item">
+              <span class="meta-label">Planted On</span>
+              <span class="meta-value" id="modal-date">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Focus Duration</span>
+              <span class="meta-value" id="modal-duration">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Focus Tag</span>
+              <span class="meta-value" id="modal-tag">-</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Market Value</span>
+              <span class="meta-value" id="modal-sell-val" style="color: var(--amber-gold);">+60 ☀️</span>
+            </div>
+          </div>
+
+          <div class="modal-note-section">
+            <label for="modal-session-note">Session Note:</label>
+            <textarea id="modal-session-note" rows="2" placeholder="What did you achieve during this focus session?"></textarea>
+          </div>
+
+          <div class="modal-action-row">
+            <button id="modal-save-note-btn" class="btn btn-secondary btn-small">Save Note</button>
+            <button id="modal-sell-btn" class="btn btn-primary btn-small">Sell to Market ☀️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CELEBRATION MODAL ==================== -->
+    <div id="celebration-modal" class="modal-backdrop">
+      <div class="modal-card celebration-card">
+        <div class="celebration-badge">🎉 Bloom Harvest Achieved!</div>
+        <div class="celebration-art" id="celebration-art"></div>
+        <h2 id="celebration-title">Your Sunflower Has Bloomed!</h2>
+        <p id="celebration-subtitle">You remained focused. Botanical herbs, jars of honey 🍯, and Sunstones have been harvested!</p>
+        
+        <div class="celebration-actions">
+          <button id="celebration-sell-btn" class="btn btn-primary">
+            Sell for Sunstones ☀️
+          </button>
+          <button id="celebration-garden-btn" class="btn btn-secondary">
+            Keep in Sanctuary 🌿
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Script Modules -->
+  <script src="audio.js"></script>
+  <script src="plants.js"></script>
+  <script src="particles.js"></script>
+  <script src="timer.js"></script>
+  <script src="garden.js"></script>
+  <script src="economy.js"></script>
+  <script src="bees.js"></script>
+  <script src="apothecary.js"></script>
+  <script src="stats.js"></script>
+  <script src="app.js"></script>
+
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('🌱 FloraFocus Service Worker registered:', reg.scope))
+          .catch(err => console.log('Service Worker registration failed:', err));
+      });
+    }
   </script>
 </body>
 </html>
